@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Gala Team</title>
+<link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  /* --- BASE & GALA THEME --- */
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; -webkit-tap-highlight-color: transparent; user-select: none; }
+  body { min-height: 100vh; background-color: #F8F9FA; color: #333; padding: 15px 15px 100px; overflow-x: hidden; }
+
+  .app-container { width: 100%; max-width: 500px; margin: 0 auto; display: flex; flex-direction: column; gap: 15px; align-items: center; }
+
+  /* HEADER */
+  .top-header { width: 100%; display: flex; justify-content: flex-start; margin-bottom: 5px; }
+  .back-btn { width: 36px; height: 36px; border-radius: 50%; background: #ffffff; border: 1px solid #ddd; display: flex; align-items: center; justify-content: center; color: #D50000; text-decoration: none; box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-size: 1.2rem; font-weight: bold; }
+  .back-btn:active { transform: scale(0.95); }
+
+  /* TOP LOGO */
+  .top-logo { width: 70px; height: 70px; border-radius: 50%; border: 2px solid #D50000; object-fit: cover; background: #fff; padding: 2px; }
+
+  /* GATHER TEXT */
+  .gather-text { font-size: 20px; font-weight: 900; color: #111; text-align: center; line-height: 1.3; margin-top: 5px; }
+  .gather-text span { color: #D50000; }
+
+  /* REFERRAL BOX */
+  .referral-box {
+    width: 100%; display: flex; justify-content: space-between; align-items: center;
+    background: #FFF0F0; border: 1px dashed #D50000; border-radius: 12px; padding: 15px;
+  }
+  .ref-info { display: flex; flex-direction: column; }
+  .ref-label { font-size: 11px; font-weight: 800; color: #D50000; text-transform: uppercase; }
+  .ref-code { font-size: 18px; font-weight: 900; color: #111; letter-spacing: 1px; margin-top: 2px; }
+  
+  .ref-actions { display: flex; gap: 8px; }
+  .btn-copy { background: #ffffff; color: #D50000; border: 1px solid #D50000; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 800; cursor: pointer; }
+  .btn-copy:active { transform: scale(0.95); background: #FFF0F0; }
+  
+  .btn-share { background: #D50000; color: #fff; border: none; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 4px; box-shadow: 0 2px 5px rgba(213,0,0,0.2); }
+  .btn-share:active { transform: scale(0.95); }
+
+  /* BANNER BOX */
+  .banner-box {
+    width: 100%; height: 140px; border: 2px solid #333; border-radius: 12px;
+    background: linear-gradient(135deg, #FFF9E6, #FFE4B5); display: flex; align-items: center; justify-content: center;
+    overflow: hidden; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  }
+  .banner-box img { width: 100%; height: 100%; object-fit: cover; }
+  .banner-text { font-size: 18px; font-weight: 900; color: #D50000; text-transform: uppercase; text-align: center; padding: 0 20px; }
+
+  /* STATS ROW */
+  .stats-row { width: 100%; display: flex; gap: 15px; }
+  .stat-box { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+  .stat-label { font-size: 13px; font-weight: 800; color: #333; text-align: center; }
+  .stat-value-box {
+    border: 2px solid #333; border-radius: 10px; padding: 12px;
+    text-align: center; font-size: 20px; font-weight: 900; color: #333; background: #fff;
+  }
+
+  /* SEARCH BAR */
+  .search-container { width: 100%; position: relative; margin-top: 5px; }
+  .search-container svg {
+    position: absolute; left: 15px; top: 50%; transform: translateY(-50%);
+    width: 18px; height: 18px; stroke: #777; fill: none; stroke-width: 2.5;
+  }
+  .search-input {
+    width: 100%; padding: 14px 15px 14px 45px; border: 2px solid #333; border-radius: 10px;
+    font-size: 14px; font-weight: 600; color: #333; outline: none; background: #fff;
+  }
+  .search-input:focus { border-color: #D50000; }
+
+  /* MEMBER LIST CONTAINER */
+  .member-list-container {
+    width: 100%; border: 2px solid #333; border-radius: 12px; padding: 15px;
+    background: #fff; min-height: 250px; max-height: 400px; overflow-y: auto;
+    display: flex; flex-direction: column; gap: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  }
+  .member-card { display: flex; align-items: center; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid #eee; }
+  .member-card:last-child { border-bottom: none; padding-bottom: 0; }
+  
+  .member-avatar { width: 45px; height: 45px; border-radius: 50%; background: #FFF0F0; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 900; color: #D50000; overflow: hidden; flex-shrink: 0; border: 1px solid #D50000; }
+  .member-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  
+  .member-info { flex: 1; min-width: 0; }
+  .member-name { font-size: 15px; font-weight: 800; color: #111; }
+  .member-phone { font-size: 12px; font-weight: 600; color: #777; }
+  .member-stats { display: flex; gap: 12px; margin-top: 4px; }
+  .member-stat { font-size: 11px; font-weight: 700; color: #555; }
+  .member-stat span { color: #16A34A; }
+  
+  .status-badge { font-size: 10px; font-weight: 800; color: #16A34A; background: #DCFCE7; padding: 4px 8px; border-radius: 6px; }
+  .empty-state { text-align: center; padding: 40px 20px; color: #777; font-size: 14px; font-weight: 600; }
+
+  /* BOTTOM NAVIGATION */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 500px; background-color: #ffffff;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 10px; box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+    border-top-left-radius: 20px; border-top-right-radius: 20px; z-index: 1000;
+  }
+  .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; color: #999; font-size: 0.6rem; font-weight: 700; flex: 1; transition: color 0.2s; }
+  .nav-item svg { width: 18px; height: 18px; fill: currentColor; }
+  .nav-item.active { color: #D50000; }
+  .nav-center-logo { flex: 1; display: flex; justify-content: center; align-items: center; }
+  .nav-center-logo .logo-circle {
+    width: 50px; height: 50px; background-color: #ffffff; border-radius: 50%;
+    display: flex; justify-content: center; align-items: center;
+    box-shadow: 0 4px 12px rgba(213, 0, 0, 0.25); border: 2px solid #FFF9E6;
+    transform: translateY(-18px); transition: transform 0.2s;
+  }
+  .nav-center-logo .logo-circle:active { transform: translateY(-18px) scale(0.95); }
+  .nav-center-logo img { width: 32px; height: auto; }
+</style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div class="top-header">
+            <a href="dashboard.html" class="back-btn">←</a>
+        </div>
+
+        <img src="logo.png" alt="Gala Logo" class="top-logo">
+
+        <div class="gather-text">Gather people from <span>Abroad</span></div>
+
+        <div class="referral-box">
+            <div class="ref-info">
+                <span class="ref-label">Your Referral Code</span>
+                <span class="ref-code" id="myRefCode">...</span>
+            </div>
+            <div class="ref-actions">
+                <button class="btn-copy" onclick="copyRef()">Copy</button>
+                <button class="btn-share" onclick="shareRef()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                    Share
+                </button>
+            </div>
+        </div>
+
+        <div class="banner-box">
+            <img src="slide1.jpg" alt="Gala Banner" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'banner-text\'>Welcome to Gala Team</div>';">
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-box">
+                <div class="stat-label">Team deposit</div>
+                <div class="stat-value-box" id="teamDeposit">0.00</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Team Size</div>
+                <div class="stat-value-box" id="teamSize">0</div>
+            </div>
+        </div>
+
+        <div class="search-container">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" class="search-input" id="searchInput" placeholder="Search by Phone number" oninput="filterMembers()">
+        </div>
+
+        <div class="member-list-container" id="memberList">
+            <div class="empty-state">Loading team members...</div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="dashboard.html" class="nav-item">
+            <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+            <span>Home</span>
+        </a>
+        <a href="team.html" class="nav-item active">
+            <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+            <span>Team</span>
+        </a>
+        <div class="nav-center-logo">
+            <a href="dashboard.html" class="logo-circle">
+                <img src="logo.png" alt="Gala Logo">
+            </a>
+        </div>
+        <a href="vip.html" class="nav-item">
+            <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+            <span>VIP</span>
+        </a>
+        <a href="profile.html" class="nav-item">
+            <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase.js"></script>
+    <script>
+        var currentUser = null;
+        var teamMembers = [];
+        let currentRefCode = '';
+
+        function $(id){ return document.getElementById(id); }
+        function f(n){ return Number(n || 0).toLocaleString('en-NG', { maximumFractionDigits: 2 }); }
+
+        async function loadTeam() {
+            try {
+                var { data, error } = await supabaseClient.from('users').select('*').eq('referred_by', currentRefCode);
+                if (error) { console.error(error); return; }
+
+                teamMembers = data || [];
+                
+                var teamSize = teamMembers.length;
+                var totalTeamDeposit = 0;
+
+                teamMembers.forEach(function(member) {
+                    totalTeamDeposit += Number(member.total_deposit || 0);
+                });
+
+                $('teamSize').textContent = teamSize;
+                $('teamDeposit').textContent = f(totalTeamDeposit);
+
+                renderMemberList();
+            } catch (e) {
+                console.error(e);
+                $('memberList').innerHTML = '<div class="empty-state">Error loading team data.</div>';
+            }
+        }
+
+        function renderMemberList() {
+            var list = $('memberList');
+            if (teamMembers.length === 0) {
+                list.innerHTML = '<div class="empty-state">You haven\'t referred anyone yet.<br>Share your code to build your team!</div>';
+                return;
+            }
+
+            list.innerHTML = teamMembers.map(function(m) {
+                var avatarContent = m.face_photo_url ? '<img src="' + m.face_photo_url + '">' : (m.full_name || 'U').charAt(0).toUpperCase();
+                var isActive = !m.banned;
+                
+                return '<div class="member-card" data-name="' + (m.full_name || '').toLowerCase() + '" data-phone="' + (m.phone || '') + '">' +
+                    '<div class="member-avatar">' + avatarContent + '</div>' +
+                    '<div class="member-info">' +
+                        '<div class="member-name">' + (m.full_name || 'User') + '</div>' +
+                        '<div class="member-phone">' + (m.phone || 'No phone') + '</div>' +
+                        '<div class="member-stats">' +
+                            '<span class="member-stat">Deposit: <span>₦' + f(m.total_deposit) + '</span></span>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="status-badge" style="' + (isActive ? '' : 'color:#EF4444;background:#FEE2E2;') + '">' + (isActive ? 'Active' : 'Inactive') + '</div>' +
+                '</div>';
+            }).join('');
+        }
+
+        function filterMembers() {
+            var input = $('searchInput').value.toLowerCase();
+            document.querySelectorAll('.member-card').forEach(card => {
+                var name = card.getAttribute('data-name');
+                var phone = card.getAttribute('data-phone');
+                if(name.includes(input) || phone.includes(input)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        function copyRef() {
+            if(!currentRefCode) return;
+            navigator.clipboard.writeText(currentRefCode);
+            alert("Referral code copied!");
+        }
+
+        async function shareRef() {
+            if(!currentRefCode) return;
+            
+            // Generate a link that includes the referral code
+            const baseUrl = window.location.origin;
+            const inviteLink = `${baseUrl}/index.html?ref=${currentRefCode}`;
+            
+            const shareData = {
+                title: 'Join Gala Sausage Roll',
+                text: `Join Gala Sausage Roll and start earning! Use my referral code: ${currentRefCode}`,
+                url: inviteLink 
+            };
+
+            try {
+                if (navigator.share) {
+                    await navigator.share(shareData);
+                } else {
+                    navigator.clipboard.writeText(shareData.text + " " + shareData.url);
+                    alert("Share link copied to clipboard!");
+                }
+            } catch (err) {
+                console.log('Error sharing:', err);
+            }
+        }
+
+        async function init() {
+            currentUser = await requireLogin();
+            if (!currentUser) return;
+            currentRefCode = currentUser.referralCode;
+            $('myRefCode').textContent = currentRefCode;
+            loadTeam();
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

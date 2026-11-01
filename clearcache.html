@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head><title>Clearing Cache...</title></head>
+<body style="background:#020617; color:#38BDF8; font-family:sans-serif; text-align:center; padding-top:50px;">
+  <h2>Clearing all old cache...</h2>
+  <p>Please wait...</p>
+  <script>
+    // 1. Unregister all service workers
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) {
+          registration.unregister();
+        }
+      });
+    }
+    // 2. Clear all browser storage
+    localStorage.clear();
+    sessionStorage.clear();
+    
+    // 3. Tell user it's done
+    setTimeout(() => {
+      document.body.innerHTML = "<h2>✅ Cache Cleared Successfully!</h2><p>You can now close this tab and open your dashboard.</p>";
+    }, 2000);
+  </script>
+</body>
+</html>

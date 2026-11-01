@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Gala - Transactions</title>
+  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { min-height: 100vh; background: #F8F9FA; padding: 15px; padding-bottom: 100px; }
+
+    /* HEADER */
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .back-btn { width: 36px; height: 36px; border-radius: 50%; background: #ffffff; border: 1px solid #ddd; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+    .header-title { font-size: 18px; font-weight: 900; color: #111; }
+    .header-spacer { width: 36px; }
+
+    /* CONTENT */
+    .app-container { width: 100%; max-width: 500px; margin: 0 auto; display: flex; flex-direction: column; gap: 15px; }
+
+    /* TABS */
+    .main-tabs { display: flex; background: #ffffff; border: 1px solid #eee; border-radius: 12px; padding: 5px; gap: 5px; }
+    .main-tab { flex: 1; text-align: center; padding: 10px 0; font-size: 13px; font-weight: 800; color: #777; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+    .main-tab.active { background: #D50000; color: #FFF; box-shadow: 0 4px 10px rgba(213,0,0,0.2); }
+
+    /* TRANSACTION LIST */
+    .transaction-list { display: flex; flex-direction: column; gap: 12px; }
+    
+    .transaction-item { 
+      display: flex; justify-content: space-between; align-items: center; 
+      background: #ffffff; border-radius: 16px; padding: 15px; 
+      border: 1px solid #f0f0f0; box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    
+    .tx-left { display: flex; align-items: center; gap: 12px; }
+    .tx-icon { width: 42px; height: 42px; border-radius: 50%; display: flex; justify-content: center; align-items: center; flex-shrink: 0; }
+    .tx-icon.in { background: #DCFCE7; color: #16A34A; }
+    .tx-icon.out { background: #FEE2E2; color: #EF4444; }
+    .tx-icon svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.5; }
+    
+    .tx-details { display: flex; flex-direction: column; gap: 3px; }
+    .tx-type { font-size: 14px; font-weight: 800; color: #111; }
+    .tx-date { font-size: 11px; color: #777; font-weight: 600; }
+
+    .tx-right { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
+    .tx-amount { font-size: 15px; font-weight: 900; }
+    .tx-amount.in { color: #16A34A; }
+    .tx-amount.out { color: #D50000; }
+    
+    /* STATUS BADGES */
+    .tx-status { font-size: 10px; font-weight: 800; text-transform: uppercase; padding: 4px 8px; border-radius: 6px; letter-spacing: 0.5px; }
+    .status-approved { background: #DCFCE7; color: #15803D; }
+    .status-pending { background: #FEF3C7; color: #B45309; }
+    .status-rejected { background: #FEE2E2; color: #B91C1C; }
+
+    .empty-state { text-align: center; color: #777; font-size: 14px; margin-top: 50px; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .empty-state svg { width: 50px; height: 50px; stroke: #ccc; fill: none; stroke-width: 1.5; }
+
+    /* BOTTOM NAVIGATION */
+    .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; background-color: #ffffff; display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; box-shadow: 0 -4px 20px rgba(0,0,0,0.06); border-top-left-radius: 20px; border-top-right-radius: 20px; z-index: 1000; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; color: #999; font-size: 0.6rem; font-weight: 700; flex: 1; transition: color 0.2s; }
+    .nav-item svg { width: 18px; height: 18px; fill: currentColor; }
+    .nav-item.active { color: #D50000; }
+    .nav-center-logo { flex: 1; display: flex; justify-content: center; align-items: center; }
+    .nav-center-logo .logo-circle { width: 50px; height: 50px; background-color: #ffffff; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 12px rgba(213, 0, 0, 0.25); border: 2px solid #FFF9E6; transform: translateY(-18px); transition: transform 0.2s; }
+    .nav-center-logo .logo-circle:active { transform: translateY(-18px) scale(0.95); }
+    .nav-center-logo img { width: 32px; height: auto; }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- HEADER -->
+    <header class="header">
+      <div class="back-btn" onclick="window.location.href='profile.html'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#D50000" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </div>
+      <div class="header-title">TRANSACTIONS</div>
+      <div class="header-spacer"></div>
+    </header>
+
+    <!-- TABS -->
+    <div class="main-tabs">
+      <div class="main-tab active" onclick="setType('all', this)">All</div>
+      <div class="main-tab" onclick="setType('in', this)">Money In</div>
+      <div class="main-tab" onclick="setType('out', this)">Money Out</div>
+    </div>
+
+    <!-- LIST -->
+    <div class="transaction-list" id="transactionList">
+      <p style="text-align:center; color:#777; font-size:14px;">Loading...</p>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAVIGATION -->
+  <nav class="bottom-nav">
+    <a href="dashboard.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span>Home</span></a>
+    <a href="team.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg><span>Team</span></a>
+    <div class="nav-center-logo"><a href="dashboard.html" class="logo-circle"><img src="logo.png"></a></div>
+    <a href="vip.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg><span>VIP</span></a>
+    <a href="profile.html" class="nav-item active"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg><span>Profile</span></a>
+  </nav>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script>
+    let allTransactions = [];
+    let currentType = 'all';
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      const user = await requireLogin();
+      if(!user) return;
+
+      // Fetch real data from Supabase
+      allTransactions = await getTransactions();
+      renderTransactions();
+    });
+
+    function setType(type, element) {
+      currentType = type;
+      document.querySelectorAll('.main-tab').forEach(tab => tab.classList.remove('active'));
+      element.classList.add('active');
+      renderTransactions();
+    }
+
+    function renderTransactions() {
+      const list = document.getElementById('transactionList');
+      
+      let filtered = currentType === 'all' 
+        ? allTransactions 
+        : allTransactions.filter(t => t.type === currentType);
+
+      if (filtered.length === 0) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <p>No transactions found</p>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      filtered.forEach(t => {
+        let isIn = t.type === 'in';
+        
+        // Format Date
+        let dateObj = new Date(t.created_at);
+        let dateStr = dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        let timeStr = dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+        // Setup Status Badge
+        let statusClass = 'status-pending';
+        let statusText = 'Pending';
+
+        if (t.status === 'approved' || t.status === 'success') {
+          statusClass = 'status-approved';
+          statusText = 'Approved';
+        } else if (t.status === 'rejected' || t.status === 'failed') {
+          statusClass = 'status-rejected';
+          statusText = 'Rejected';
+        }
+
+        html += `
+          <div class="transaction-item">
+            <div class="tx-left">
+              <div class="tx-icon ${isIn ? 'in' : 'out'}">
+                <svg viewBox="0 0 24 24">
+                  ${isIn ? `<path d="M12 5v14M19 12l-7 7-7-7"/>` : `<path d="M12 19V5M5 12l7-7 7 7"/>`}
+                </svg>
+              </div>
+              <div class="tx-details">
+                <div class="tx-type">${isIn ? 'Deposit' : 'Withdrawal'}</div>
+                <div class="tx-date">${dateStr} • ${timeStr}</div>
+              </div>
+            </div>
+            <div class="tx-right">
+              <div class="tx-amount ${isIn ? 'in' : 'out'}">${isIn ? '+' : '-'}₦${Number(t.amount).toLocaleString()}</div>
+              <div class="tx-status ${statusClass}">${statusText}</div>
+            </div>
+          </div>
+        `;
+      });
+
+      list.innerHTML = html;
+    }
+  </script>
+</body>
+</html>

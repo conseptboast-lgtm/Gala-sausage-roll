@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Gala Profile</title>
+<link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+  body { min-height: 100vh; background: #F8F9FA; padding: 15px; padding-bottom: 100px; }
+  
+  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+  .back-btn { font-size: 1.5rem; color: #D50000; text-decoration: none; }
+  .header-logo { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #D50000; object-fit: cover; }
+
+  /* USER PROFILE HEADER */
+  .user-profile-info { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+  .user-avatar { width: 65px; height: 65px; border-radius: 50%; background: #FFF0F0; border: 2px solid #D50000; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 900; color: #D50000; }
+  .user-details h3 { font-size: 18px; font-weight: 900; color: #111; margin-bottom: 3px; }
+  .user-details p { font-size: 13px; color: #777; font-weight: 600; }
+
+  /* BALANCE CARD */
+  .balance-card { background: linear-gradient(135deg, #D50000, #8B0000); border-radius: 20px; padding: 20px; color: #fff; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(213,0,0,0.2); position: relative; }
+  
+  /* VIP BADGE AT TOP OF CARD */
+  .vip-badge-top { display: inline-block; background: rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.4); }
+  
+  .balance-card p { font-size: 0.9rem; opacity: 0.9; }
+  .balance-card h2 { font-size: 38px; font-weight: 900; margin: 5px 0 15px 0; }
+  .balance-details { display: flex; justify-content: space-between; font-size: 12px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 15px; }
+  
+  /* ACTIONS */
+  .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+  .action-btn { background: #fff; border: 1px solid #eee; border-radius: 16px; padding: 20px 10px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-decoration: none; color: #333; box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: 0.2s; }
+  .action-btn:active { transform: scale(0.95); background: #FFF0F0; border-color: #D50000; }
+  .action-btn svg { width: 28px; height: 28px; stroke: #D50000; stroke-width: 2.5; fill: none; }
+  .action-btn span { font-size: 0.9rem; font-weight: 800; }
+
+  /* MENU */
+  .menu { display: flex; flex-direction: column; gap: 10px; }
+  .item { background: #fff; padding: 18px 20px; border-radius: 14px; display: flex; justify-content: space-between; text-decoration: none; color: #333; font-weight: 700; border: 1px solid #eee; }
+  .item:active { background: #FFF0F0; }
+  
+  /* FLOATING NAV */
+  .nav { position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); display: flex; justify-content: space-around; padding: 12px 10px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border: 1px solid #eee; z-index: 1000; }
+  .nav a { text-decoration: none; color: #777; font-size: 11px; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .nav a svg { width: 20px; height: 20px; fill: currentColor; }
+  .nav a.active { color: #D50000; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <a href="dashboard.html" class="back-btn">←</a>
+    <img src="logo.png" class="header-logo">
+  </div>
+
+  <!-- REAL USER CREDENTIALS -->
+  <div class="user-profile-info">
+    <div class="user-avatar" id="userInitial">U</div>
+    <div class="user-details">
+      <h3 id="userName">Loading...</h3>
+      <p id="userPhone">...</p>
+    </div>
+  </div>
+  
+  <div class="balance-card">
+    <!-- VIP STATUS -->
+    <div class="vip-badge-top" id="vipStatus">Loading Plan...</div>
+    
+    <p>Total Balance</p>
+    <h2 id="bal">₦0.00</h2>
+    <div class="balance-details">
+      <span>Deposit: <b id="dep">₦0</b></span>
+      <span>Profit: <b id="prof">₦0</b></span>
+    </div>
+  </div>
+
+  <div class="action-grid">
+    <a href="cashin.html" class="action-btn">
+      <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M12 12h.01"/></svg>
+      <span>Recharge</span>
+    </a>
+    <a href="cashout.html" class="action-btn">
+      <svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      <span>Cashout</span>
+    </a>
+  </div>
+
+  <div class="menu">
+    <a href="add-bank.html" class="item">Bind a Bank Card <span>></span></a>
+    <a href="transaction-detail.html" class="item">Transaction History <span>></span></a>
+    <a href="#" class="item" onclick="logout()" style="color:#EF4444;">Sign Out <span>></span></a>
+  </div>
+
+  <div class="nav">
+    <a href="dashboard.html"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Home</a>
+    <a href="team.html"><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>Team</a>
+    <a href="vip.html"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>VIP</a>
+    <a href="profile.html" class="active"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>Profile</a>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      let u = await requireLogin();
+      if(u) {
+        // Real User Credentials
+        document.getElementById('userName').innerText = u.fullName || 'User';
+        document.getElementById('userPhone').innerText = u.phone || 'No phone';
+        document.getElementById('userInitial').innerText = (u.firstName || 'U').charAt(0).toUpperCase();
+
+        // VIP Status
+        const vipBadge = document.getElementById('vipStatus');
+        if (u.vipPlan) {
+            vipBadge.innerText = u.vipPlan + " Active";
+            vipBadge.style.background = "#FFD700";
+            vipBadge.style.color = "#000";
+            vipBadge.style.border = "none";
+        } else {
+            vipBadge.innerText = "No VIP Plan";
+        }
+
+        // Financials
+        document.getElementById('bal').innerText = '₦' + Number(u.balance).toLocaleString('en-NG', {minimumFractionDigits: 2});
+        document.getElementById('dep').innerText = '₦' + Number(u.totalDeposit).toLocaleString();
+        document.getElementById('prof').innerText = '₦' + Number(u.totalEarned).toLocaleString();
+      }
+    });
+    function logout() { localStorage.clear(); window.location.href='index.html'; }
+  </script>
+</body>
+</html>

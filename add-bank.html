@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bind Bank</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+  body { background: #F8F9FA; padding: 15px; }
+  .header { display: flex; justify-content: center; align-items: center; margin-bottom: 15px; position: relative; }
+  .back-btn { position: absolute; left: 0; font-size: 1.5rem; color: #D50000; text-decoration: none; }
+  .header-logo { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #D50000; object-fit: cover; }
+  .card { background: #fff; border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+  input, select { width: 100%; padding: 15px; margin-bottom: 15px; border: 2px solid #ddd; border-radius: 12px; font-size: 15px; outline: none; }
+  input:focus, select:focus { border-color: #D50000; }
+  button { width: 100%; background: #D50000; color: #fff; border: none; padding: 15px; border-radius: 12px; font-weight: 900; font-size: 1rem; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <a href="profile.html" class="back-btn">←</a>
+    <img src="logo.png" class="header-logo">
+  </div>
+  
+  <div class="card">
+    <select id="bank">
+      <option value="">-- Select Your Bank --</option>
+      <optgroup label="Commercial Banks">
+        <option value="Access Bank">Access Bank</option>
+        <option value="Citibank">Citibank</option>
+        <option value="Ecobank">Ecobank</option>
+        <option value="Fidelity Bank">Fidelity Bank</option>
+        <option value="First Bank">First Bank</option>
+        <option value="FCMB">First City Monument Bank (FCMB)</option>
+        <option value="Globus Bank">Globus Bank</option>
+        <option value="GTBank">Guaranty Trust Bank (GTB)</option>
+        <option value="Heritage Bank">Heritage Bank</option>
+        <option value="Jaiz Bank">Jaiz Bank</option>
+        <option value="Keystone Bank">Keystone Bank</option>
+        <option value="Optimus Bank">Optimus Bank</option>
+        <option value="Parallex Bank">Parallex Bank</option>
+        <option value="Polaris Bank">Polaris Bank</option>
+        <option value="Premium Trust Bank">Premium Trust Bank</option>
+        <option value="Providus Bank">Providus Bank</option>
+        <option value="Stanbic IBTC">Stanbic IBTC</option>
+        <option value="Standard Chartered">Standard Chartered</option>
+        <option value="Sterling Bank">Sterling Bank</option>
+        <option value="SunTrust Bank">SunTrust Bank</option>
+        <option value="Titan Trust Bank">Titan Trust Bank</option>
+        <option value="Union Bank">Union Bank</option>
+        <option value="UBA">United Bank for Africa (UBA)</option>
+        <option value="Unity Bank">Unity Bank</option>
+        <option value="Wema Bank">Wema Bank</option>
+        <option value="Zenith Bank">Zenith Bank</option>
+      </optgroup>
+      <optgroup label="Fintech & Microfinance">
+        <option value="Opay">Opay</option>
+        <option value="PalmPay">PalmPay</option>
+        <option value="Moniepoint">Moniepoint MFB</option>
+        <option value="Kuda">Kuda Bank</option>
+        <option value="Carbon">Carbon</option>
+        <option value="FairMoney">FairMoney</option>
+        <option value="Sparkle">Sparkle</option>
+        <option value="VFD">VFD Microfinance Bank</option>
+        <option value="Rubies">Rubies MFB</option>
+        <option value="Mintyn">Mintyn Bank</option>
+        <option value="Eyowo">Eyowo</option>
+        <option value="9PSB">9 Payment Service Bank</option>
+        <option value="Hope PSB">Hope Payment Service Bank</option>
+        <option value="MTN MoMo PSB">MTN MoMo PSB</option>
+        <option value="Airtel SmartCash PSB">Airtel SmartCash PSB</option>
+      </optgroup>
+    </select>
+    <input type="text" id="num" placeholder="Account Number" maxlength="10">
+    <input type="text" id="name" placeholder="Account Name">
+    <input type="password" id="pin" placeholder="4-Digit PIN" maxlength="4">
+    <button onclick="save()">Save Details</button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script>
+    async function save() {
+      let b = document.getElementById('bank').value;
+      let n = document.getElementById('num').value;
+      let nm = document.getElementById('name').value;
+      let p = document.getElementById('pin').value;
+      
+      if(!b || !n || !nm || !p) return alert("Fill all fields");
+      
+      let ok = await updateBankDetails(b, n, nm, p);
+      if(ok) { alert("Saved!"); window.location.href = 'profile.html'; }
+      else alert("Error saving");
+    }
+  </script>
+</body>
+</html>

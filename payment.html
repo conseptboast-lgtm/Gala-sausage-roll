@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Payment Details</title>
+<link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+  body { background: #F8F9FA; display: flex; justify-content: center; min-height: 100vh; }
+  .app-container { width: 100%; max-width: 500px; background: #fff; min-height: 100vh; }
+  
+  .header { display: flex; padding: 15px 20px; border-bottom: 1px solid #eee; position: relative; justify-content: center; align-items: center; }
+  .back-btn { position: absolute; left: 20px; font-size: 1.5rem; color: #D50000; text-decoration: none; font-weight: bold; }
+  .header-logo { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #D50000; object-fit: cover; }
+  
+  .content { padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+  
+  .card { border: 2px solid #333; border-radius: 12px; padding: 15px; display: flex; gap: 15px; }
+  .bank-logo { width: 75px; border: 1px solid #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 5px; }
+  .bank-logo img { width: 100%; object-fit: contain; }
+  .details { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+  .details p { font-size: 0.8rem; color: #777; font-weight: 600; margin-bottom: 2px; }
+  .details h4 { font-size: 1rem; color: #111; font-weight: 800; }
+
+  .upload-box { border: 2px dashed #D50000; border-radius: 12px; padding: 20px; text-align: center; background: #FFF0F0; cursor: pointer; position: relative; }
+  .upload-box input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .upload-box p { color: #D50000; font-weight: 800; font-size: 0.9rem; }
+  .upload-box small { color: #777; font-size: 0.7rem; }
+  .file-name { margin-top: 10px; font-size: 0.8rem; color: #16A34A; font-weight: 800; display: none; }
+
+  .funded-btn { border: 2px solid #333; border-radius: 12px; padding: 15px; display: flex; align-items: center; gap: 10px; background: #fff; cursor: not-allowed; width: 100%; font-weight: 800; font-size: 0.9rem; opacity: 0.5; transition: 0.3s; }
+  .funded-btn.active { cursor: pointer; opacity: 1; border-color: #D50000; background: #D50000; color: #fff; }
+</style>
+</head>
+<body>
+  <div class="app-container">
+    <header class="header">
+      <a href="cashin.html" class="back-btn">&lt;</a>
+      <img src="logo.png" class="header-logo">
+    </header>
+    
+    <div class="content">
+      <div class="card">
+        <div class="bank-logo" id="bankLogo"></div>
+        <div class="details">
+          <div><p>Bank Name</p><h4 id="bName"></h4></div>
+          <div><p>Account Number</p><h4 id="bNum"></h4></div>
+          <div><p>Account Name</p><h4>Doris Isawode</h4></div>
+          <div><p>Amount</p><h4 id="bAmt" style="color:#D50000;"></h4></div>
+        </div>
+      </div>
+
+      <div class="upload-box">
+        <input type="file" id="receiptFile" accept="image/*" onchange="handleFile(this)">
+        <p>📸 Upload Payment Receipt</p>
+        <small>Tap here to select your transfer screenshot</small>
+        <div class="file-name" id="fileName">✅ Receipt Attached</div>
+      </div>
+
+      <button class="funded-btn" id="submitBtn" onclick="confirmPayment()">
+        <input type="checkbox" id="chk" onclick="toggleBtn()" disabled style="width:18px; height:18px;"> I have funded my wallet
+      </button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script>
+    let amt = localStorage.getItem('depAmount');
+    let chan = localStorage.getItem('depChannel');
+    let fileAttached = false;
+    
+    document.getElementById('bAmt').innerText = '₦' + Number(amt).toLocaleString();
+    
+    const banks = {
+      'PalmPay': { logo: 'palmpay-logo.png', name: 'PalmPay Business', num: '8909444921' },
+      'FirstBank': { logo: 'firstbank-logo.png', name: 'First Bank', num: '3083245519' },
+      'SmartCash': { logo: 'smartcash-logo.png', name: 'Smartcash PSB', num: '1931170891' }
+    };
+    
+    document.getElementById('bankLogo').innerHTML = `<img src="${banks[chan].logo}" onerror="this.src='logo.png'">`;
+    document.getElementById('bName').innerText = banks[chan].name;
+    document.getElementById('bNum').innerText = banks[chan].num;
+
+    function handleFile(input) {
+      if (input.files && input.files.length > 0) {
+        fileAttached = true;
+        document.getElementById('fileName').style.display = 'block';
+        document.getElementById('chk').disabled = false;
+        document.getElementById('submitBtn').classList.add('active');
+      }
+    }
+
+    async function confirmPayment() {
+      if(!fileAttached) return alert("Please upload your payment receipt.");
+      if(!document.getElementById('chk').checked) return alert("Please check the box to confirm.");
+      
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.innerText = "Uploading Receipt...";
+      submitBtn.disabled = true;
+
+      const file = document.getElementById('receiptFile').files[0];
+      const userId = getUserId();
+
+      // 1. Upload image to Supabase Storage
+      const fileName = `${userId}_${Date.now()}.jpg`;
+      const { data: uploadData, error: uploadError } = await supabaseClient.storage
+        .from('receipts')
+        .upload(fileName, file);
+
+      if (uploadError) {
+        alert("Error uploading image: " + uploadError.message);
+        submitBtn.innerText = "I have funded my wallet";
+        submitBtn.disabled = false;
+        return;
+      }
+
+      // 2. Get Public URL for the image
+      const { data: urlData } = supabaseClient.storage.from('receipts').getPublicUrl(fileName);
+      const publicUrl = urlData.publicUrl;
+
+      // 3. Save Deposit as PENDING with the image link
+      const { error: dbError } = await supabaseClient.from('deposits').insert([{ 
+        user_id: userId, 
+        amount: Number(amt), 
+        channel: chan, 
+        status: 'pending',
+        receipt_url: publicUrl // Adding the image link!
+      }]);
+
+      if (dbError) {
+        alert("Error submitting deposit.");
+        submitBtn.innerText = "I have funded my wallet";
+        submitBtn.disabled = false;
+        return;
+      }
+
+      alert("Deposit submitted! Waiting for Admin approval.");
+      window.location.href = 'dashboard.html';
+    }
+  </script>
+</body>
+</html>
