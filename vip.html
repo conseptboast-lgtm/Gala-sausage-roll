@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Gala - VIP Plans</title>
+  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { min-height: 100vh; background-color: #FFFFFF; padding-bottom: 100px; }
+    
+    .header { display: flex; justify-content: space-between; align-items: center; padding: 15px; }
+    .back-btn { font-size: 1.5rem; color: #D50000; text-decoration: none; }
+    .header-title { font-size: 18px; font-weight: 900; }
+    .header-logo { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #D50000; }
+
+    .app-container { width: 100%; max-width: 480px; margin: 0 auto; padding: 0 12px; }
+    .vip-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    .vip-card { background: #F8F9FA; border: 1px solid #E5E7EB; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+    .vip-img-container { height: 75px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+    .vip-img-container img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    
+    .vip-info { display: flex; flex-direction: column; gap: 3px; margin-bottom: 10px; }
+    .vip-info-row { font-size: 10px; color: #6B7280; font-weight: 600; }
+    .vip-info-row span { color: #111; font-weight: 800; }
+    
+    .vip-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
+    .vip-price { font-size: 14px; font-weight: 900; color: #111; }
+    
+    .buy-btn { background: #22C55E; color: #000; border: none; padding: 5px 10px; border-radius: 4px; font-size: 11px; font-weight: 800; cursor: pointer; }
+    .buy-btn.closed { background: #D1D5DB; color: #6B7280; cursor: not-allowed; }
+
+    .vip-card.current-vip { border: 3px solid #D50000; background: #FFF0F0; box-shadow: 0 4px 15px rgba(213, 0, 0, 0.15); }
+    .current-badge { position: absolute; top: 0; right: 0; background: #D50000; color: white; padding: 3px 8px; font-size: 9px; font-weight: 900; border-bottom-left-radius: 8px; z-index: 10; }
+    
+    .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; background: #fff; display: flex; justify-content: space-between; padding: 8px 10px; box-shadow: 0 -4px 20px rgba(0,0,0,0.06); border-radius: 20px 20px 0 0; z-index: 1000; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; color: #999; font-size: 0.6rem; font-weight: 700; flex: 1; text-decoration: none;}
+    .nav-item.active { color: #D50000; }
+    .nav-item svg { width: 18px; fill: currentColor; }
+    .nav-center-logo .logo-circle { width: 50px; height: 50px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #FFF9E6; transform: translateY(-18px); }
+    .nav-center-logo img { width: 32px; }
+
+    .custom-modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 9999; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
+    .custom-modal-overlay.active { opacity: 1; visibility: visible; }
+    .custom-modal-card { background: #ffffff; border-radius: 24px; padding: 25px 20px; width: 100%; max-width: 340px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); text-align: center; transform: scale(0.8) translateY(20px); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; border: 2px solid #FFF0F0; }
+    .custom-modal-overlay.active .custom-modal-card { transform: scale(1) translateY(0); }
+    .modal-icon-wrap { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto; font-size: 30px; }
+    .modal-icon-wrap.confirm { background: #FFF0F0; color: #D50000; }
+    .modal-icon-wrap.success { background: #DCFCE7; color: #16A34A; }
+    .modal-icon-wrap.error { background: #FEE2E2; color: #EF4444; }
+    .custom-modal-title { font-size: 18px; font-weight: 900; color: #111; margin-bottom: 10px; }
+    .custom-modal-desc { font-size: 13px; color: #666; font-weight: 600; margin-bottom: 20px; line-height: 1.5; }
+    .modal-actions { display: flex; gap: 10px; }
+    .modal-btn { flex: 1; padding: 12px; border-radius: 10px; font-size: 13px; font-weight: 800; cursor: pointer; border: none; transition: 0.2s; }
+    .modal-btn.cancel { background: #F3F4F6; color: #4B5563; }
+    .modal-btn.confirm { background: #D50000; color: #ffffff; }
+    .modal-btn.ok { background: #22C55E; color: #ffffff; width: 100%; }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <header class="header">
+      <a href="dashboard.html" class="back-btn">←</a>
+      <div class="header-title">VIP PLANS</div>
+      <img src="logo.png" class="header-logo">
+    </header>
+
+    <div class="vip-grid" id="vipContainer"></div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="dashboard.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span>Home</span></a>
+    <a href="team.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg><span>Team</span></a>
+    <div class="nav-center-logo"><a href="dashboard.html" class="logo-circle"><img src="logo.png"></a></div>
+    <a href="vip.html" class="nav-item active"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg><span>VIP</span></a>
+    <a href="profile.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg><span>Profile</span></a>
+  </nav>
+
+  <div class="custom-modal-overlay" id="customModal">
+    <div class="custom-modal-card">
+      <div class="modal-icon-wrap" id="modalIcon">?</div>
+      <div class="custom-modal-title" id="modalTitle">Title</div>
+      <div class="custom-modal-desc" id="modalDesc">Description</div>
+      <div class="modal-actions" id="modalActions">
+        <button class="modal-btn cancel" id="btnCancel" onclick="closeModal(false)">Cancel</button>
+        <button class="modal-btn confirm" id="btnConfirm" onclick="closeModal(true)">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script>
+    let currentBalance = 0;
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      const user = await requireLogin();
+      if(!user) return;
+      currentBalance = user.balance;
+
+      const container = document.getElementById('vipContainer');
+
+      // VIP 3 is now OPEN with updated values
+      const plans = [
+        { id: 'VIP 1', price: 4500, daily: '800', total: '48,000', status: 'open' },
+        { id: 'VIP 2', price: 11000, daily: '2,200', total: '132,000', status: 'open' },
+        { id: 'VIP 3', price: 25000, daily: '25,000', total: '1,500,000', status: 'open' },
+        { id: 'VIP 4', price: 55000, daily: '5,100', total: '306,000', status: 'closed' },
+        { id: 'VIP 5', price: 100000, daily: '8,000', total: '480,000', status: 'closed' }
+      ];
+
+      let html = '';
+
+      plans.forEach(plan => {
+        const isCurrent = user.vipPlan === plan.id;
+        
+        if (isCurrent) {
+          html += `
+            <div class="vip-card current-vip">
+              <div class="current-badge">CURRENT</div>
+              <div class="vip-img-container"><img src="gala-vip1.png" onerror="this.src='logo.png'"></div>
+              <div class="vip-info">
+                <div class="vip-info-row">Daily income: <span>₦ ${plan.daily}</span></div>
+                <div class="vip-info-row">Total income: <span>₦ ${plan.total}</span></div>
+                <div class="vip-info-row">Validity: <span>60 days</span></div>
+              </div>
+              <div class="vip-bottom">
+                <div class="vip-price">₦ ${plan.price.toLocaleString()}</div>
+                <button class="buy-btn closed" disabled>Active</button>
+              </div>
+            </div>
+          `;
+        } else if (plan.status === 'open') {
+          html += `
+            <div class="vip-card">
+              <div class="vip-img-container"><img src="gala-vip1.png" onerror="this.src='logo.png'"></div>
+              <div class="vip-info">
+                <div class="vip-info-row">Daily income: <span>₦ ${plan.daily}</span></div>
+                <div class="vip-info-row">Total income: <span>₦ ${plan.total}</span></div>
+                <div class="vip-info-row">Validity: <span>60 days</span></div>
+              </div>
+              <div class="vip-bottom">
+                <div class="vip-price">₦ ${plan.price.toLocaleString()}</div>
+                <button class="buy-btn" onclick="buyVIP('${plan.id}', ${plan.price})">Upgrade</button>
+              </div>
+            </div>
+          `;
+        } else {
+          html += `
+            <div class="vip-card" style="opacity: 0.7;">
+              <div class="vip-img-container"><img src="gala-vip1.png" onerror="this.src='logo.png'" style="filter: grayscale(100%);"></div>
+              <div class="vip-info">
+                <div class="vip-info-row">Daily income: <span>₦ ${plan.daily}</span></div>
+                <div class="vip-info-row">Total income: <span>₦ ${plan.total}</span></div>
+                <div class="vip-info-row">Validity: <span>60 days</span></div>
+              </div>
+              <div class="vip-bottom">
+                <div class="vip-price">₦ ${plan.price.toLocaleString()}</div>
+                <button class="buy-btn closed" disabled>Closed</button>
+              </div>
+            </div>
+          `;
+        }
+      });
+
+      container.innerHTML = html;
+    });
+
+    let modalResolve;
+    const modalOverlay = document.getElementById('customModal');
+
+    function showCustomModal(title, desc, type, showCancel = true) {
+      document.getElementById('modalTitle').innerText = title;
+      document.getElementById('modalDesc').innerText = desc;
+      
+      const iconWrap = document.getElementById('modalIcon');
+      const btnCancel = document.getElementById('btnCancel');
+      const btnConfirm = document.getElementById('btnConfirm');
+
+      if (type === 'confirm') {
+        iconWrap.innerText = '🛒';
+        iconWrap.className = 'modal-icon-wrap confirm';
+        btnConfirm.className = 'modal-btn confirm';
+        btnConfirm.innerText = 'Yes, Buy Now';
+      } else if (type === 'success') {
+        iconWrap.innerText = '✅';
+        iconWrap.className = 'modal-icon-wrap success';
+        btnConfirm.className = 'modal-btn ok';
+        btnConfirm.innerText = 'Okay';
+      } else if (type === 'error') {
+        iconWrap.innerText = '❌';
+        iconWrap.className = 'modal-icon-wrap error';
+        btnConfirm.className = 'modal-btn confirm';
+        btnConfirm.innerText = 'Deposit Now';
+      }
+
+      btnCancel.style.display = showCancel ? 'block' : 'none';
+      modalOverlay.classList.add('active');
+
+      return new Promise((resolve) => {
+        modalResolve = resolve;
+      });
+    }
+
+    function closeModal(value) {
+      modalOverlay.classList.remove('active');
+      if (modalResolve) {
+        modalResolve(value);
+        modalResolve = null;
+      }
+    }
+
+    async function buyVIP(planId, amount) {
+      const confirmed = await showCustomModal(
+        'Confirm Purchase', 
+        `Are you sure you want to upgrade to ${planId} for ₦${amount.toLocaleString()}?`, 
+        'confirm'
+      );
+
+      if (confirmed) {
+        const result = await buyVIPWithBalance(planId, amount);
+        
+        if (result.success) {
+          await showCustomModal(
+            'Upgrade Successful', 
+            `You are now on ${planId}. Redirecting to dashboard...`, 
+            'success', 
+            false
+          );
+          window.location.href = 'dashboard.html';
+        } else {
+          const goToDeposit = await showCustomModal(
+            'Insufficient Funds', 
+            result.message, 
+            'error', 
+            true 
+          );
+          if (goToDeposit) {
+            window.location.href = 'cashin.html'; 
+          }
+        }
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Gala - Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    /* --- BASE STYLES --- */
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: #F8F9FA; overflow-x: hidden; }
+
+    /* --- HEADER --- */
+    .app-header { background: #fff; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.03); position: sticky; top: 0; z-index: 100; }
+    .app-header .header-logo { width: 45px; height: 45px; border-radius: 50%; border: 2px solid #D50000; object-fit: cover; background: #fff; }
+    .user-number { font-size: 0.95rem; font-weight: 900; color: #000; }
+    .header-right { display: flex; align-items: center; gap: 12px; }
+    .bell-icon { width: 20px; stroke: #333; }
+    
+    /* Customer Service Header Button */
+    .cs-header-btn { display: flex; flex-direction: column; align-items: center; cursor: pointer; text-decoration: none; }
+    .cs-header-btn img { width: 24px; height: 24px; border-radius: 50%; border: 1px solid #D50000; }
+    .cs-header-btn span { font-size: 0.45rem; font-weight: 800; color: #D50000; text-transform: uppercase; text-align: center; }
+
+    /* --- DASHBOARD CONTENT --- */
+    .dash-content { width: 100%; max-width: 500px; margin: 0 auto; padding: 15px; padding-bottom: 100px; display: flex; flex-direction: column; gap: 15px; }
+
+    /* --- SLIDING BANNER --- */
+    .slider-container { width: 100%; border-radius: 16px; overflow: hidden; position: relative; aspect-ratio: 16 / 9; background: #000; }
+    .slide { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: 0.8s; border: none; pointer-events: none; }
+    .slide.active { opacity: 1; z-index: 1; }
+
+    /* --- ACTION BUTTONS --- */
+    .action-grid { display: flex; gap: 10px; }
+    .modern-btn { flex: 1; background: #fff; border: 1px solid rgba(0,0,0,0.04); padding: 10px 4px; border-radius: 14px; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; }
+    .icon-wrap { width: 32px; height: 32px; border-radius: 9px; display: flex; align-items: center; justify-content: center; }
+    .btn-cash-in .icon-wrap { background: #FFF0F0; color: #D50000; }
+    .btn-cash-out .icon-wrap { background: #FFF9E6; color: #D4A000; }
+    .btn-product .icon-wrap { background: #F0F4F8; color: #333; }
+    .icon-wrap svg { width: 18px; height: 18px; fill: currentColor; }
+    .modern-btn span { font-size: 0.7rem; font-weight: 800; color: #444; }
+
+    /* --- VIP SECTION --- */
+    .vip-section { background: #fff; border-radius: 16px; padding: 15px; border: 2px solid #FFD700; }
+    .vip-header { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+    .vip-header h3 { font-size: 1.2rem; color: #D50000; font-weight: 900; }
+    .welcome-bonus { background: #FFF0F0; color: #D50000; font-size: 0.7rem; font-weight: 800; padding: 5px 10px; border-radius: 6px; border: 1px solid #D50000; }
+    
+    .vip-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+    .vip-card { background: #F8F9FA; border: 1px solid #E5E7EB; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; }
+    .vip-img-container { width: 100%; height: 70px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+    .vip-img-container img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    .vip-info { display: flex; flex-direction: column; gap: 3px; margin-bottom: 10px; }
+    .vip-info-row { font-size: 10px; color: #6B7280; font-weight: 600; }
+    .vip-info-row span { color: #111; font-weight: 800; }
+    .vip-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
+    .vip-price { font-size: 13px; font-weight: 900; color: #111; }
+    .buy-btn { background: #22C55E; color: #000; border: none; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 800; cursor: pointer; transition: 0.2s; }
+    .buy-btn:active { transform: scale(0.95); }
+    
+    /* Closed Button Style */
+    .buy-btn.closed { background: #D1D5DB; color: #6B7280; cursor: not-allowed; }
+    .vip-card.closed { opacity: 0.7; }
+
+    /* --- FLOATING TELEGRAM ICON --- */
+    .float-telegram { position: fixed; bottom: 90px; right: 20px; width: 50px; height: 50px; background-color: #0088cc; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0, 136, 204, 0.4); z-index: 999; text-decoration: none; transition: transform 0.2s; }
+    .float-telegram:active { transform: scale(0.9); }
+    .float-telegram svg { width: 26px; height: 26px; fill: #fff; margin-right: 2px; }
+
+    /* --- BOTTOM NAVIGATION --- */
+    .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; background: #fff; display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; box-shadow: 0 -4px 20px rgba(0,0,0,0.06); border-radius: 20px 20px 0 0; z-index: 1000; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; color: #999; font-size: 0.6rem; font-weight: 700; flex: 1; }
+    .nav-item svg { width: 18px; height: 18px; fill: currentColor; }
+    .nav-item.active { color: #D50000; }
+    .nav-center-logo { flex: 1; display: flex; justify-content: center; align-items: center; }
+    .nav-center-logo .logo-circle { width: 50px; height: 50px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #FFF9E6; box-shadow: 0 4px 12px rgba(213, 0, 0, 0.25); transform: translateY(-18px); transition: transform 0.2s; }
+    .nav-center-logo .logo-circle:active { transform: translateY(-18px) scale(0.95); }
+    .nav-center-logo img { width: 32px; height: auto; }
+
+    /* --- POPUP MODALS --- */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 2000; }
+    .modal-card { background: #ffffff; border-radius: 20px; padding: 20px; width: 100%; max-width: 400px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto; position: relative; border: 3px solid #D50000; }
+    .modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; border-bottom: 2px dashed #eee; padding-bottom: 15px; }
+    .modal-title { font-size: 15px; font-weight: 900; color: #D50000; line-height: 1.3; text-transform: uppercase; padding-right: 10px;}
+    .modal-close { background: #f0f0f0; color: #333; border: none; width: 30px; height: 30px; border-radius: 50%; font-size: 16px; font-weight: 900; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .modal-body { font-size: 13px; color: #444; line-height: 1.6; font-weight: 500; }
+    .modal-body p { margin-bottom: 12px; }
+    .highlight-text { color: #D50000; font-weight: 900; }
+    .gala-is-back { text-align: center; font-size: 18px; font-weight: 900; color: #D50000; margin-top: 15px; text-transform: uppercase; }
+    .modal-btn { width: 100%; background-color: #D50000; color: #fff; border: none; padding: 15px; font-size: 1rem; font-weight: 900; border-radius: 12px; cursor: pointer; margin-top: 20px; box-shadow: 0 4px 10px rgba(213,0,0,0.3); text-transform: uppercase; }
+    .modal-tg-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; background-color: #0088cc; color: #fff; text-decoration: none; padding: 15px; border-radius: 12px; font-size: 1rem; font-weight: 900; margin-top: 10px; box-shadow: 0 4px 10px rgba(0, 136, 204, 0.3); }
+    .modal-tg-btn svg { width: 22px; height: 22px; fill: #fff; }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <img src="logo.png" class="header-logo">
+    <div class="user-number" id="user-phone-display">Loading...</div>
+    <div class="header-right">
+      <!-- Customer Service linked to Telegram -->
+      <a href="https://t.me/GalaCustomerService" target="_blank" class="cs-header-btn">
+        <img src="cs-float.jpg"><span>Customer<br>Service</span>
+      </a>
+    </div>
+  </header>
+
+  <div class="dash-content">
+    <!-- SLIDING BANNER -->
+    <div class="slider-container">
+      <iframe class="slide active" src="https://www.youtube.com/embed/G6Cs0f1Hmic?autoplay=1&mute=1&loop=1&playlist=G6Cs0f1Hmic&controls=0" allow="autoplay"></iframe>
+      <iframe class="slide" src="https://www.youtube.com/embed/-L2pkSLbVyM?autoplay=1&mute=1&loop=1&playlist=-L2pkSLbVyM&controls=0" allow="autoplay"></iframe>
+      <iframe class="slide" src="https://www.youtube.com/embed/CP2D4O3vfLM?autoplay=1&mute=1&loop=1&playlist=CP2D4O3vfLM&controls=0" allow="autoplay"></iframe>
+    </div>
+
+    <!-- ACTION BUTTONS (Connected to files) -->
+    <div class="action-grid">
+      <button class="modern-btn btn-cash-in" onclick="window.location.href='cashin.html'">
+        <div class="icon-wrap"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg></div>
+        <span>Cash In</span>
+      </button>
+      <button class="modern-btn btn-cash-out" onclick="window.location.href='cashout.html'">
+        <div class="icon-wrap"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9v-4H7v-2h2V6h2v4h2v2h-2v4z"/></svg></div>
+        <span>Cash Out</span>
+      </button>
+      <button class="modern-btn btn-product" onclick="window.location.href='product.html'">
+        <div class="icon-wrap"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
+        <span>Product</span>
+      </button>
+    </div>
+
+    <!-- VIP SECTION -->
+    <div class="vip-section">
+      <div class="vip-header">
+        <h3>Gala Investment Packs</h3>
+        <span class="welcome-bonus">Bonus: ₦1,000</span>
+      </div>
+      
+      <div class="vip-grid">
+        <!-- VIP 1 (OPEN) -->
+        <div class="vip-card">
+          <div class="vip-img-container"><img src="gala-vip1.png" alt="VIP 1" onerror="this.src='logo.png'"></div>
+          <div class="vip-info">
+            <div class="vip-info-row">Daily: <span>₦ 800</span></div>
+            <div class="vip-info-row">Total: <span>₦ 48,000</span></div>
+          </div>
+          <div class="vip-bottom">
+            <div class="vip-price">₦ 4,500</div>
+            <button class="buy-btn" onclick="window.location.href='vip.html'">Buy</button>
+          </div>
+        </div>
+
+        <!-- VIP 2 (OPEN) -->
+        <div class="vip-card">
+          <div class="vip-img-container"><img src="gala-vip1.png" alt="VIP 2" onerror="this.src='logo.png'"></div>
+          <div class="vip-info">
+            <div class="vip-info-row">Daily: <span>₦ 2,200</span></div>
+            <div class="vip-info-row">Total: <span>₦ 132,000</span></div>
+          </div>
+          <div class="vip-bottom">
+            <div class="vip-price">₦ 11,000</div>
+            <button class="buy-btn" onclick="window.location.href='vip.html'">Buy</button>
+          </div>
+        </div>
+
+        <!-- VIP 3 (CLOSED) -->
+        <div class="vip-card closed">
+          <div class="vip-img-container"><img src="gala-vip1.png" alt="VIP 3" onerror="this.src='logo.png'"></div>
+          <div class="vip-info">
+            <div class="vip-info-row">Daily: <span>₦ 4,000</span></div>
+            <div class="vip-info-row">Total: <span>₦ 240,000</span></div>
+          </div>
+          <div class="vip-bottom">
+            <div class="vip-price">₦ 25,000</div>
+            <button class="buy-btn closed" disabled>Closed</button>
+          </div>
+        </div>
+
+        <!-- VIP 4 (CLOSED) -->
+        <div class="vip-card closed">
+          <div class="vip-img-container"><img src="gala-vip1.png" alt="VIP 4" onerror="this.src='logo.png'"></div>
+          <div class="vip-info">
+            <div class="vip-info-row">Daily: <span>₦ 5,100</span></div>
+            <div class="vip-info-row">Total: <span>₦ 306,000</span></div>
+          </div>
+          <div class="vip-bottom">
+            <div class="vip-price">₦ 55,000</div>
+            <button class="buy-btn closed" disabled>Closed</button>
+          </div>
+        </div>
+
+        <!-- VIP 5 (CLOSED) -->
+        <div class="vip-card closed">
+          <div class="vip-img-container"><img src="gala-vip1.png" alt="VIP 5" onerror="this.src='logo.png'"></div>
+          <div class="vip-info">
+            <div class="vip-info-row">Daily: <span>₦ 8,000</span></div>
+            <div class="vip-info-row">Total: <span>₦ 480,000</span></div>
+          </div>
+          <div class="vip-bottom">
+            <div class="vip-price">₦ 100,000</div>
+            <button class="buy-btn closed" disabled>Closed</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLOATING TELEGRAM ICON -->
+  <a href="https://t.me/GalaCustomerService" target="_blank" class="float-telegram">
+    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.19-.08-.05-.19-.02-.27 0-.11.03-1.87 1.19-5.3 3.49-.5.34-.95.51-1.35.5-.44-.01-1.29-.25-1.92-.45-.77-.25-1.38-.38-1.33-.8.03-.22.32-.44.87-.68 3.4-1.48 5.67-2.46 6.82-2.93 3.25-1.35 3.92-1.58 4.36-1.59.1 0 .31.02.45.13.12.09.15.21.17.35.02.11.02.21.01.32z"/></svg>
+  </a>
+
+  <!-- BOTTOM NAVIGATION -->
+  <nav class="bottom-nav">
+    <a href="dashboard.html" class="nav-item active"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span>Home</span></a>
+    <a href="team.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg><span>Team</span></a>
+    
+    <!-- CENTER LOGO -->
+    <div class="nav-center-logo"><a href="sell.html" class="logo-circle"><img src="logo.png"></a></div>
+    
+    <a href="vip.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg><span>VIP</span></a>
+    <a href="profile.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg><span>Profile</span></a>
+  </nav>
+
+  <!-- POPUP MODAL 1 (WELCOME & HALAL IMAGE) -->
+  <div class="modal-overlay" id="welcomeModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">WELCOME TO GALA SAUSAGE ROLL COMPANY</div>
+        <button class="modal-close" onclick="closeWelcomeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <p>We are all happy to have you as a member. Gala Sausage roll snack was launched in 1962 by UAC foods limited.</p>
+        <div style="margin: 15px 0;">
+           <img src="gala-halal.jpg" alt="Gala Halal Certification" style="width: 100%; border-radius: 12px; display: block; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+        </div>
+        <p>In July 2021, the Halal Certification Authority Certified the Gala Classic Sausage roll.</p>
+        <p><span class="highlight-text">Gala is giving out 50 million</span> to users who work with them and celebrate their 64 year Anniversary.</p>
+        <div class="gala-is-back">( Gala is back )</div>
+        <button class="modal-btn" onclick="closeWelcomeModal()">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POPUP MODAL 2 (VIP PLAN & TELEGRAM) -->
+  <div class="modal-overlay" id="vipModal" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">GALA VIP RECRUITMENT</div>
+        <button class="modal-close" onclick="closeVipModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="margin-bottom: 15px;">
+           <img src="gala-vip-plan.jpg" alt="Gala VIP Plan" style="width: 100%; border-radius: 12px; display: block;">
+        </div>
+        <p style="text-align: center; font-weight: 800; color: #111; margin-bottom: 10px;">Join our Telegram Group for VIP Updates & Support!</p>
+        <a href="https://t.me/GalaCustomerService" target="_blank" class="modal-tg-btn">JOIN TELEGRAM GROUP</a>
+        <button class="modal-btn" style="background-color: #333; margin-top: 15px;" onclick="closeVipModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPTS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const user = await requireLogin();
+      if(user) {
+        document.getElementById('user-phone-display').textContent = user.phone;
+      }
+    });
+
+    let slideInterval = setInterval(() => {
+      let slides = document.querySelectorAll('.slide');
+      let active = document.querySelector('.slide.active');
+      active.classList.remove('active');
+      if(active.nextElementSibling) active.nextElementSibling.classList.add('active');
+      else slides[0].classList.add('active');
+    }, 10000);
+
+    function closeWelcomeModal() {
+      document.getElementById('welcomeModal').style.display = 'none';
+      setTimeout(() => {
+        document.getElementById('vipModal').style.display = 'flex';
+      }, 300);
+    }
+
+    function closeVipModal() {
+      document.getElementById('vipModal').style.display = 'none';
+    }
+  </script>
+</body>
+</html>

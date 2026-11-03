@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Gala - Sell Products</title>
+  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background: #F8F9FA; padding: 15px; padding-bottom: 100px; }
+
+    .sell-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+    .header-logo-circle { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #D50000; object-fit: cover; background: #fff; }
+    .balance-box { background: #FFF0F0; border: 1px solid #D50000; padding: 10px 15px; border-radius: 12px; text-align: right; }
+    .balance-box p { font-size: 11px; font-weight: 800; color: #D50000; text-transform: uppercase; }
+    .balance-box h3 { font-size: 20px; font-weight: 900; color: #111; margin-top: 2px; }
+
+    .sell-actions { display: flex; gap: 15px; margin-bottom: 25px; align-items: center; }
+    
+    .btn-plus-sell { 
+      flex: 1; background: #D50000; color: #fff; border: none; padding: 15px; 
+      border-radius: 12px; font-size: 18px; font-weight: 900; cursor: pointer;
+      box-shadow: 0 4px 15px rgba(213,0,0,0.3); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    }
+    .btn-plus-sell:active { transform: scale(0.98); }
+    .btn-plus-sell.disabled { background: #D1D5DB; color: #6B7280; cursor: not-allowed; box-shadow: none; }
+    .btn-counter { font-size: 12px; font-weight: 600; background: rgba(0,0,0,0.1); padding: 2px 8px; border-radius: 10px; }
+
+    .btn-pendings { background: #fff; border: 2px solid #333; padding: 12px 20px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
+    .pendings-circle { width: 30px; height: 30px; border: 3px solid #333; border-radius: 50%; margin-bottom: 5px; }
+    .btn-pendings span { font-size: 11px; font-weight: 800; color: #333; }
+
+    .sold-products-box { border: 2px solid #333; border-radius: 12px; padding: 15px; background: #fff; }
+    .sold-header { font-size: 16px; font-weight: 900; color: #333; margin-bottom: 15px; text-align: center; border-bottom: 1px dashed #ddd; padding-bottom: 10px; }
+    
+    .product-item { display: flex; flex-direction: column; gap: 5px; padding: 12px; background: #F9FAFB; border: 1px solid #eee; border-radius: 8px; margin-bottom: 10px; }
+    .product-item:last-child { margin-bottom: 0; }
+    
+    .p-top { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #777; }
+    .p-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 5px; }
+    .p-price { font-size: 16px; font-weight: 900; color: #D50000; }
+    .p-status { font-size: 11px; font-weight: 800; color: #16A34A; background: #DCFCE7; padding: 3px 8px; border-radius: 6px; }
+    
+    .product-item.pending { border-color: #FFD700; background: #FFFDF5; }
+    .product-item.pending .p-price { color: #B45309; }
+    .p-timer { font-size: 14px; font-weight: 900; color: #D50000; background: #FFF0F0; padding: 4px 10px; border-radius: 6px; font-family: monospace; }
+    .p-status.pending { color: #B45309; background: #FEF3C7; }
+
+    .empty-state { text-align: center; padding: 30px 10px; color: #777; font-size: 14px; font-weight: 600; }
+
+    .float-telegram { position: fixed; bottom: 90px; right: 20px; width: 50px; height: 50px; background-color: #0088cc; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0, 136, 204, 0.4); z-index: 999; text-decoration: none; transition: transform 0.2s; }
+    .float-telegram:active { transform: scale(0.9); }
+    .float-telegram svg { width: 26px; height: 26px; fill: #fff; margin-right: 2px; }
+
+    .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; background: #fff; display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; box-shadow: 0 -4px 20px rgba(0,0,0,0.06); border-radius: 20px 20px 0 0; z-index: 1000; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; color: #999; font-size: 0.6rem; font-weight: 700; flex: 1; }
+    .nav-item svg { width: 18px; height: 18px; fill: currentColor; }
+    .nav-item.active { color: #D50000; }
+    .nav-center-logo { flex: 1; display: flex; justify-content: center; align-items: center; }
+    .nav-center-logo .logo-circle { width: 50px; height: 50px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #FFF9E6; box-shadow: 0 4px 12px rgba(213, 0, 0, 0.25); transform: translateY(-18px); transition: transform 0.2s; }
+    .nav-center-logo .logo-circle:active { transform: translateY(-18px) scale(0.95); }
+    .nav-center-logo img { width: 32px; height: auto; }
+  </style>
+</head>
+<body>
+
+  <div class="sell-header">
+    <img src="logo.png" class="header-logo-circle">
+    <div class="balance-box">
+      <p>Bal</p>
+      <h3 id="userBalance">₦ 0.00</h3>
+    </div>
+  </div>
+
+  <div class="sell-actions" id="sellActions" style="display: none;">
+    <button class="btn-plus-sell" id="btnSell" onclick="goToSell()">
+      + Sell
+      <span class="btn-counter" id="taskCounter">0/4</span>
+    </button>
+    <button class="btn-pendings" onclick="alert('Your pending tasks are shown below.')">
+      <div class="pendings-circle"></div>
+      <span>Pendings</span>
+    </button>
+  </div>
+
+  <div class="sold-products-box">
+    <div class="sold-header">All your Sold Products</div>
+    <div id="productsList">
+      <p style="text-align:center; color:#777; font-size:14px; margin-top:20px;">Loading...</p>
+    </div>
+  </div>
+
+  <a href="https://t.me/GalaCustomerService" target="_blank" class="float-telegram">
+    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.19-.08-.05-.19-.02-.27 0-.11.03-1.87 1.19-5.3 3.49-.5.34-.95.51-1.35.5-.44-.01-1.29-.25-1.92-.45-.77-.25-1.38-.38-1.33-.8.03-.22.32-.44.87-.68 3.4-1.48 5.67-2.46 6.82-2.93 3.25-1.35 3.92-1.58 4.36-1.59.1 0 .31.02.45.13.12.09.15.21.17.35.02.11.02.21.01.32z"/></svg>
+  </a>
+
+  <nav class="bottom-nav">
+    <a href="dashboard.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span>Home</span></a>
+    <a href="team.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg><span>Team</span></a>
+    <div class="nav-center-logo"><a href="dashboard.html" class="logo-circle"><img src="logo.png"></a></div>
+    <a href="vip.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg><span>VIP</span></a>
+    <a href="profile.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg><span>Profile</span></a>
+  </nav>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script>
+    let activeTimers = {};
+    let currentUser = null;
+    let maxTasks = 4; 
+
+    async function loadDashboard() {
+      currentUser = await requireLogin();
+      if(!currentUser) return;
+
+      document.getElementById('userBalance').textContent = '₦ ' + Number(currentUser.balance).toLocaleString('en-NG', {minimumFractionDigits: 2});
+
+      const sellActions = document.getElementById('sellActions');
+      const counterEl = document.getElementById('taskCounter');
+      const btnSell = document.getElementById('btnSell');
+      const productsList = document.getElementById('productsList');
+
+      if(!currentUser.vipPlan) {
+        sellActions.style.display = 'none';
+        productsList.innerHTML = `
+          <div class="empty-state">
+            You do not have an active VIP plan.<br><br>
+            Please go to the VIP page to purchase a plan and start earning.
+          </div>
+        `;
+        return;
+      }
+
+      sellActions.style.display = 'flex';
+      
+      // Set max tasks based on VIP Plan
+      if (currentUser.vipPlan === 'VIP 3') {
+          maxTasks = 8;
+      } else {
+          maxTasks = 4;
+      }
+      
+      let dailyTasksDone = await getDailyTaskCount();
+      counterEl.innerText = `${dailyTasksDone}/${maxTasks}`;
+
+      if(dailyTasksDone >= maxTasks) {
+        btnSell.classList.add('disabled');
+        btnSell.onclick = () => alert(`You have completed all ${maxTasks} tasks for today! Come back tomorrow.`);
+      } else {
+        btnSell.classList.remove('disabled');
+        btnSell.onclick = () => window.location.href = "products.html";
+      }
+
+      const products = await getUserProducts();
+      
+      if(products.length === 0) {
+        productsList.innerHTML = '<div class="empty-state">No products yet. Click "+ Sell" to start.</div>';
+        return;
+      }
+
+      let html = '';
+      products.forEach(p => {
+        const date = new Date(p.created_at);
+        const dateStr = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+        const timeStr = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+        if (p.status === 'pending') {
+          html += `
+            <div class="product-item pending" id="task-${p.id}">
+              <div class="p-top"><span>Date: ${dateStr}</span><span>Time: ${timeStr}</span></div>
+              <div class="p-bottom">
+                <div class="p-price">₦ ${Number(p.earning).toLocaleString()}</div>
+                <div class="p-timer" id="timer-${p.id}">00:59</div>
+                <div class="p-status pending">Pending</div>
+              </div>
+            </div>
+          `;
+          startTimer(p.id, p.created_at, p.earning);
+        } else {
+          html += `
+            <div class="product-item">
+              <div class="p-top"><span>Date: ${dateStr}</span><span>Time: ${timeStr}</span></div>
+              <div class="p-bottom">
+                <div class="p-price">₦ ${Number(p.earning).toLocaleString()}</div>
+                <div class="p-status completed">Completed</div>
+              </div>
+            </div>
+          `;
+        }
+      });
+      productsList.innerHTML = html;
+    }
+
+    function startTimer(taskId, createdAt, earning) {
+      if (activeTimers[taskId]) clearInterval(activeTimers[taskId]);
+      const startTime = new Date(createdAt).getTime();
+      const duration = 59000; // 59 seconds
+
+      activeTimers[taskId] = setInterval(async () => {
+        const now = new Date().getTime();
+        const remaining = duration - (now - startTime);
+
+        if (remaining <= 0) {
+          clearInterval(activeTimers[taskId]);
+          document.getElementById(`timer-${taskId}`).innerText = "00:00";
+          
+          let success = await completeProductTask(taskId, earning);
+          if(success) { loadDashboard(); } 
+        } else {
+          const secs = Math.floor(remaining / 1000);
+          const timerEl = document.getElementById(`timer-${taskId}`);
+          if(timerEl) timerEl.innerText = `00:${secs.toString().padStart(2, '0')}`;
+        }
+      }, 1000);
+    }
+
+    document.addEventListener("DOMContentLoaded", loadDashboard);
+  </script>
+</body>
+</html>

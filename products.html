@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Gala - Select Product</title>
+  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { min-height: 100vh; background-color: #FFFFFF; padding: 20px; display: flex; flex-direction: column; }
+
+    /* HEADER */
+    .header { display: flex; justify-content: center; align-items: center; position: relative; margin-bottom: 20px; }
+    .back-btn { position: absolute; left: 0; font-size: 1.5rem; color: #D50000; text-decoration: none; font-weight: bold; }
+    .logo-circle { width: 75px; height: 75px; border-radius: 50%; border: 2px solid #D50000; display: flex; align-items: center; justify-content: center; background: #fff; box-shadow: 0 4px 10px rgba(213, 0, 0, 0.1); }
+    .logo-circle img { width: 100%; height: auto; }
+
+    /* TITLE */
+    .page-title { text-align: center; font-size: 18px; font-weight: 900; color: #111; margin-bottom: 25px; letter-spacing: 0.5px; }
+
+    /* TABS */
+    .tabs { display: flex; gap: 10px; margin-bottom: 15px; width: 100%; max-width: 500px; margin-left: auto; margin-right: auto; justify-content: center;}
+    .tab-btn { flex: 1; padding: 12px; border-radius: 8px; border: 2px solid #ddd; background: #fff; font-weight: 800; cursor: pointer; display: none; }
+    .tab-btn.active { border-color: #D50000; background: #FFF0F0; color: #D50000; }
+
+    /* PRODUCTS GRID */
+    .products-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; max-width: 500px; margin: 0 auto; padding-bottom: 80px; }
+
+    .product-box {
+      background: #FFF9E6; border: 2px solid #333; border-radius: 12px; padding: 15px;
+      display: flex; align-items: center; justify-content: center; cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      position: relative; overflow: hidden; height: 110px;
+    }
+    .product-box:active { transform: scale(0.95); }
+    .product-box img { max-width: 100%; max-height: 100%; object-fit: contain; z-index: 1; }
+
+    /* SELECTION CHECKMARK */
+    .checkmark-overlay {
+      position: absolute; inset: 0; background: rgba(255, 255, 255, 0.8);
+      display: none; align-items: center; justify-content: center; z-index: 2;
+    }
+    .product-box.selected { border: 4px solid #D50000; box-shadow: 0 0 15px rgba(213, 0, 0, 0.4); }
+    .product-box.selected .checkmark-overlay { display: flex; }
+    
+    /* Thick Red Checkmark */
+    .checkmark-overlay svg { width: 60px; height: 60px; stroke: #D50000; stroke-width: 6; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* TRANSFER BUTTON */
+    .transfer-btn-container { position: fixed; bottom: 20px; right: 20px; z-index: 100; }
+    .transfer-btn { background: #ffffff; border: 2px solid #333; color: #333; padding: 12px 25px; border-radius: 10px; font-size: 16px; font-weight: 900; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.15); transition: 0.2s; }
+    .transfer-btn:active { background: #D50000; color: #fff; border-color: #D50000; transform: scale(0.95); }
+    
+    .empty-state { grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: #777; font-size: 15px; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <a href="sell.html" class="back-btn">←</a>
+    <div class="logo-circle"><img src="logo.png" alt="Gala Logo"></div>
+  </div>
+
+  <div class="page-title">[Your Gala Products]</div>
+
+  <!-- TABS (Hidden by default, JS will show the correct one) -->
+  <div class="tabs">
+    <button class="tab-btn" id="tabVip1" onclick="setTier('VIP 1', 200, this)">VIP 1 (₦200/task)</button>
+    <button class="tab-btn" id="tabVip2" onclick="setTier('VIP 2', 550, this)">VIP 2 (₦550/task)</button>
+  </div>
+
+  <!-- PRODUCTS GRID -->
+  <div class="products-container" id="productGrid">
+    <!-- JS will populate this -->
+  </div>
+
+  <div class="transfer-btn-container" id="transferBtnContainer">
+    <button class="transfer-btn" onclick="transferProduct()">Transfer</button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script>
+    let selectedElement = null;
+    let currentLevel = '';
+    let currentEarning = 0;
+    let currentUser = null;
+
+    // 1. Initialize and check VIP plan
+    document.addEventListener("DOMContentLoaded", async () => {
+      currentUser = await requireLogin();
+      if (!currentUser) return;
+
+      const grid = document.getElementById('productGrid');
+      const transferBtn = document.getElementById('transferBtnContainer');
+
+      if (currentUser.vipPlan === 'VIP 1') {
+        document.getElementById('tabVip1').style.display = 'block';
+        document.getElementById('tabVip1').classList.add('active');
+        setTier('VIP 1', 200);
+      } 
+      else if (currentUser.vipPlan === 'VIP 2') {
+        document.getElementById('tabVip2').style.display = 'block';
+        document.getElementById('tabVip2').classList.add('active');
+        setTier('VIP 2', 550);
+      } 
+      else {
+        // User has NO VIP plan
+        document.querySelector('.tabs').style.display = 'none';
+        transferBtn.style.display = 'none';
+        grid.innerHTML = `
+          <div class="empty-state">
+            You do not have an active VIP plan.<br><br>
+            Please go to the VIP page to purchase a plan and start earning.
+          </div>
+        `;
+      }
+    });
+
+    // 2. Set the tier and generate 4 boxes
+    function setTier(level, earning) {
+      currentLevel = level;
+      currentEarning = earning;
+      
+      // Reset selection
+      if(selectedElement) selectedElement.classList.remove('selected');
+      selectedElement = null;
+
+      // Generate 4 product boxes
+      const grid = document.getElementById('productGrid');
+      grid.innerHTML = '';
+      for(let i=0; i<4; i++) {
+        let box = document.createElement('div');
+        box.className = 'product-box';
+        box.onclick = function() { selectProduct(this); };
+        box.innerHTML = `
+          <img src="gala-vip1.png" alt="Gala Product" onerror="this.src='logo.png'">
+          <div class="checkmark-overlay"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+        `;
+        grid.appendChild(box);
+      }
+    }
+
+    // 3. Handle product selection
+    function selectProduct(element) {
+      if (selectedElement) selectedElement.classList.remove('selected');
+      element.classList.add('selected');
+      selectedElement = element;
+    }
+
+    // 4. Handle Transfer
+    async function transferProduct() {
+      if (!selectedElement) {
+        alert("Please tap a Gala product box to select it first.");
+        return;
+      }
+      
+      const btn = document.querySelector('.transfer-btn');
+      btn.innerText = "Transferring...";
+      btn.disabled = true;
+
+      // Save to Supabase
+      let success = await createUserProduct(currentLevel, currentEarning);
+      
+      if (success) {
+        alert("Product transferred successfully! Check your dashboard.");
+        window.location.href = "sell.html";
+      } else {
+        alert("Error transferring product. Please try again.");
+        btn.innerText = "Transfer";
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>
