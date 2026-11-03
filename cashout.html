@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Gala Cashout</title>
+<link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+  body { min-height: 100vh; background: #F8F9FA; padding: 15px; display: flex; justify-content: center; }
+  .app-container { width: 100%; max-width: 500px; background: #fff; border-radius: 16px; padding-bottom: 20px; }
+  .header { display: flex; padding: 15px 20px; border-bottom: 1px solid #eee; position: relative; justify-content: center; align-items: center; }
+  .back-btn { position: absolute; left: 20px; font-size: 1.5rem; color: #D50000; text-decoration: none; font-weight: bold; }
+  .header-logo { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #D50000; object-fit: cover; }
+  .content { padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+  .balance-card { background: #D50000; border-radius: 16px; padding: 20px; color: #fff; text-align: center; }
+  .balance-card h2 { font-size: 32px; }
+  .input-group input { width: 100%; padding: 15px; font-size: 1.4rem; font-weight: 900; text-align: center; border: 2px solid #ddd; border-radius: 12px; }
+  .summary { background: #F9FAFB; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+  .row { display: flex; justify-content: space-between; font-weight: 600; color: #555; }
+  .process-btn { width: 100%; background: #D50000; color: #fff; border: none; padding: 15px; font-size: 1rem; font-weight: 900; border-radius: 12px; cursor: pointer; }
+  .process-btn.disabled { background: #ccc; cursor: not-allowed; }
+  .alert-box { background: #FEF2F2; border: 1px solid #F87171; color: #B91C1C; padding: 12px; border-radius: 8px; font-size: 13px; font-weight: 700; text-align: center; display: none; }
+</style>
+</head>
+<body>
+  <div class="app-container">
+    <header class="header">
+      <a href="dashboard.html" class="back-btn">&lt;</a>
+      <img src="logo.png" class="header-logo">
+    </header>
+    <div class="content">
+      
+      <!-- ALERT BOX -->
+      <div class="alert-box" id="alertBox">You have already made a withdrawal today. Please come back tomorrow.</div>
+
+      <div class="balance-card">
+        <p>Available Balance</p>
+        <h2 id="bal">₦0.00</h2>
+      </div>
+      <input type="number" id="amount" placeholder="₦ 0.00" oninput="calc()">
+      <div class="summary">
+        <div class="row"><span>Amount</span><span id="sAmt">₦0</span></div>
+        <div class="row"><span>Fee (15%)</span><span id="sFee" style="color:red;">-₦0</span></div>
+        <div class="row" style="color:#D50000; font-weight:900;"><span>You Receive</span><span id="sRec">₦0</span></div>
+      </div>
+      <button class="process-btn" id="withdrawBtn" onclick="withdraw()">Withdraw Funds</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script>
+    let uBal = 0;
+    let hasWithdrawnToday = false;
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      let u = await requireLogin();
+      if(u) { 
+        uBal = Number(u.balance) || 0; 
+        document.getElementById('bal').innerText = '₦' + uBal.toLocaleString('en-NG', {minimumFractionDigits: 2}); 
+        
+        // Check if already withdrawn today
+        const { data } = await supabaseClient.from('users').select('last_withdrawal_at').eq('id', u.userId).single();
+        if (data && data.last_withdrawal_at) {
+            const lastDate = new Date(data.last_withdrawal_at).toDateString();
+            const todayDate = new Date().toDateString();
+            if (lastDate === todayDate) {
+                hasWithdrawnToday = true;
+                document.getElementById('alertBox').style.display = 'block';
+                document.getElementById('withdrawBtn').classList.add('disabled');
+                document.getElementById('withdrawBtn').innerText = 'Withdrawal Locked (Wait for tomorrow)';
+            }
+        }
+      }
+    });
+
+    function calc() {
+      let a = Number(document.getElementById('amount').value) || 0;
+      let fee = a * 0.15; // 15% Fee
+      document.getElementById('sAmt').innerText = '₦' + a.toLocaleString();
+      document.getElementById('sFee').innerText = '-₦' + fee.toLocaleString();
+      document.getElementById('sRec').innerText = '₦' + (a - fee).toLocaleString();
+    }
+
+    async function withdraw() {
+      if (hasWithdrawnToday) return alert("You can only withdraw once a day.");
+      
+      let a = Number(document.getElementById('amount').value);
+      if(a < 1500) return alert("Minimum withdrawal amount is ₦1,500"); // Updated minimum
+      if(a > uBal) return alert("Insufficient balance");
+      
+      const btn = document.getElementById('withdrawBtn');
+      btn.innerText = "Processing...";
+      btn.disabled = true;
+
+      try {
+        // Uses the function from supabase.js
+        await processWithdrawal(a);
+        alert("Withdrawal request submitted successfully! Please wait for admin approval.");
+        window.location.href = 'dashboard.html';
+      } catch (error) {
+        alert(error.message);
+        btn.innerText = "Withdraw Funds";
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>
